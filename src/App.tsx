@@ -2,7 +2,7 @@ import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } fro
 import { listen } from "@tauri-apps/api/event";
 import { api, AppError, Device, DeviceProfile, Discovered, toAppError } from "./api";
 import { Button, Dialog, EmptyState, Icon, IconButton, LinearProgress, SelectField, useErrorText } from "./components";
-import { SnackbarProvider } from "./snackbar";
+import { SnackbarProvider, useSnackbar } from "./snackbar";
 import { I18nProvider, LANGS, Lang, useI18n } from "./i18n";
 import { ActivityProvider, useActivities } from "./activity";
 import { storageGet, storageSet } from "./storage";
@@ -27,6 +27,20 @@ function loadDevice(): Device | null {
   }
 }
 
+// What each known device supports, so picking it again opens at once; the
+// probe then runs in the background and updates it.
+function loadProfiles(): Record<string, DeviceProfile> {
+  try {
+    return JSON.parse(storageGet("profiles") ?? "{}") as Record<string, DeviceProfile>;
+  } catch {
+    return {};
+  }
+}
+
+function saveProfile(host: string, p: DeviceProfile) {
+  storageSet("profiles", JSON.stringify({ ...loadProfiles(), [host]: p }));
+}
+
 export default function App() {
   return (
     <I18nProvider>
@@ -43,7 +57,12 @@ function Shell() {
   const { t, lang, setLang } = useI18n();
   const errorText = useErrorText();
   const [device, setDevice] = useState<Device | null>(loadDevice);
-  const [profile, setProfile] = useState<DeviceProfile | null>(null);
+  const snack = useSnackbar();
+  const [profile, setProfile] = useState<DeviceProfile | null>(() =>
+    device ? (loadProfiles()[device.host] ?? null) : null,
+  );
+  // Probing a device we already know: its screens stay usable meanwhile.
+  const [refreshing, setRefreshing] = useState(false);
   const [probeError, setProbeError] = useState<AppError | null>(null);
   const [probing, setProbing] = useState(false);
   const [probeNonce, setProbeNonce] = useState(0);
@@ -69,21 +88,38 @@ function Shell() {
     storageSet("device", JSON.stringify(d));
   }, []);
 
-  // Probe what the device supports whenever it changes (or on retry).
+  // Probe what the device supports whenever it changes (or on retry). A known
+  // device opens right away with what it supported last time.
   useEffect(() => {
     if (!device) return;
     let cancelled = false;
-    setProbing(true);
-    setProfile(null);
+    const cached = loadProfiles()[device.host] ?? null;
+    setProfile(cached);
     setProbeError(null);
+    setProbing(!cached);
+    setRefreshing(!!cached);
     api
       .probe(device)
-      .then((p) => !cancelled && setProfile(p))
-      .catch((e) => !cancelled && setProbeError(toAppError(e)))
-      .finally(() => !cancelled && setProbing(false));
+      .then((p) => {
+        if (cancelled) return;
+        saveProfile(device.host, p);
+        // Same answer: keep the object so the screens don't reload.
+        setProfile((old) => (old && JSON.stringify(old) === JSON.stringify(p) ? old : p));
+      })
+      .catch((e) => {
+        if (cancelled) return;
+        if (cached) snack(t("devices.refreshFailed", { name: device.name ?? device.host }), { kind: "warning" });
+        else setProbeError(toAppError(e));
+      })
+      .finally(() => {
+        if (cancelled) return;
+        setProbing(false);
+        setRefreshing(false);
+      });
     return () => {
       cancelled = true;
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [device, probeNonce]);
 
   const search = useCallback(async () => {
@@ -307,6 +343,11 @@ function Shell() {
           </div>
         ) : (
           <>
+            {refreshing && (
+              <div className="top-progress refresh-progress">
+                <LinearProgress label={t("sidebar.connecting")} />
+              </div>
+            )}
             {shown("overview") && (
               <div className="tab-panel" hidden={activeTab !== "overview"}>
                 <OverviewView key={device.host} device={device} profile={profile} />

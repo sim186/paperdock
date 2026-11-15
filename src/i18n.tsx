@@ -35,6 +35,7 @@ const en = {
     addressHint: "IP address or host name, as shown on the printer's network page",
     connecting: "Connecting to {name}",
     connectingBody: "Checking what this device can do.",
+    refreshFailed: "{name} isn't answering. Showing what it could do last time.",
     failed: "Can't connect to {name}",
   },
   sidebar: {
@@ -469,6 +470,7 @@ const it: typeof en = {
     addressHint: "Indirizzo IP o nome host, come nella pagina di rete della stampante",
     connecting: "Collegamento a {name}",
     connectingBody: "Verifico cosa sa fare questo dispositivo.",
+    refreshFailed: "{name} non risponde. Mostro cosa sapeva fare l'ultima volta.",
     failed: "Impossibile collegarsi a {name}",
   },
   sidebar: {

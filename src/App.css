@@ -431,6 +431,11 @@ h2 {
   top: 0;
   z-index: 5;
 }
+/* background re-probe of a known device: a hairline over the screen, no layout shift */
+.refresh-progress {
+  height: 0;
+  overflow: visible;
+}
 
 /* navigation rail below 1000px */
 @media (max-width: 1000px) {
