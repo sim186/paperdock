@@ -22,6 +22,18 @@ It speaks open standards first and vendor APIs only as extras:
 
 Tabs appear only for what the device supports.
 
+## Download
+
+Installers for macOS (Apple silicon and Intel), Windows and Linux are on the
+[Releases](https://github.com/sim186/paperdock/releases) page.
+
+The builds are not code-signed yet, so the OS warns the first time:
+
+- **macOS**: right-click PaperDock in Applications → Open → Open. Or run
+  `xattr -dr com.apple.quarantine /Applications/PaperDock.app`.
+- **Windows**: SmartScreen → More info → Run anyway.
+- **Linux**: `chmod +x PaperDock_*.AppImage`, or install the `.deb` / `.rpm`.
+
 ## Features
 
 - **Discovery** of printers and scanners on the LAN; remembers what it found
@@ -61,6 +73,24 @@ PAPERDOCK_HOST=192.168.1.84 cargo test live -- --ignored --nocapture   # read-on
 ```
 
 Build installers for the current OS: `npm run tauri build`.
+
+## Release
+
+GitHub Actions (`.github/workflows/`):
+
+- `ci.yml`: on every push to `main` and every pull request, typechecks and builds
+  the frontend and runs `cargo test`.
+- `release.yml`: builds the installers on macOS, Windows and Linux and attaches
+  them to a **draft** release. To release:
+
+  ```sh
+  # bump "version" in src-tauri/tauri.conf.json, package.json and src-tauri/Cargo.toml
+  git commit -am "Release 0.2.0"
+  git tag v0.2.0 && git push && git push --tags
+  ```
+
+  then review the draft on the Releases page and publish it. The tag must match the
+  version in `tauri.conf.json`. The workflow can also be run by hand from the Actions tab.
 
 ## Layout
 
