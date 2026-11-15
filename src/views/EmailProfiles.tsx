@@ -16,6 +16,15 @@ import {
 import { useSnackbar } from "../snackbar";
 import { useLoad } from "../hooks";
 import { useI18n } from "../i18n";
+import { openUrl } from "@tauri-apps/plugin-opener";
+import {
+  cleanAppPassword,
+  defaultDisplayName,
+  EmailProvider,
+  PROVIDERS,
+  providerForEmail,
+  providerForServer,
+} from "./emailProviders";
 
 const MAX_PROFILES = 20;
 
@@ -33,11 +42,16 @@ const EMPTY: EmailAccount = {
   pin: "",
 };
 
-const PRESETS: { label: string; server: string; port: number; ssl: boolean }[] = [
-  { label: "Gmail", server: "smtp.gmail.com", port: 465, ssl: true },
-  { label: "Outlook / Microsoft 365", server: "smtp.office365.com", port: 587, ssl: true },
-  { label: "Aruba", server: "smtps.aruba.it", port: 465, ssl: true },
-];
+/** Guided steps per provider that needs an app password (i18n keys under emailSetup.steps). */
+const STEP_COUNT = 3;
+
+async function openExternal(url: string) {
+  try {
+    await openUrl(url);
+  } catch {
+    window.open(url, "_blank", "noopener");
+  }
+}
 
 export default function EmailProfiles({ host }: { host: string }) {
   const { t } = useI18n();
@@ -45,6 +59,8 @@ export default function EmailProfiles({ host }: { host: string }) {
   const snack = useSnackbar();
   const { data, error, loading, reload } = useLoad(() => api.emailAccounts(host), [host]);
   const [editing, setEditing] = useState<EmailAccount | null>(null);
+  /** New-profile wizard: "choose" shows the provider list, a provider shows its quick setup. */
+  const [wizard, setWizard] = useState<"choose" | EmailProvider | null>(null);
   const [busyId, setBusyId] = useState<string | null>(null);
   const [confirmDelete, setConfirmDelete] = useState<EmailAccount | null>(null);
 
@@ -79,6 +95,41 @@ export default function EmailProfiles({ host }: { host: string }) {
     }
   }
 
+  if (wizard === "choose") {
+    return (
+      <ProviderPicker
+        onCancel={() => setWizard(null)}
+        onPick={(p) => setWizard(p)}
+        onOther={() => {
+          setWizard(null);
+          setEditing({ ...EMPTY });
+        }}
+      />
+    );
+  }
+
+  if (wizard) {
+    return (
+      <QuickSetup
+        key={wizard.id}
+        host={host}
+        provider={wizard}
+        onBack={() => setWizard("choose")}
+        onSwitch={(p) => setWizard(p)}
+        onAdvanced={(a) => {
+          setWizard(null);
+          setEditing(a);
+        }}
+        onCreated={async (a) => {
+          setWizard(null);
+          snack(t("profiles.created", { name: a.displayName }), { kind: "success" });
+          await reload();
+          await runTest(a);
+        }}
+      />
+    );
+  }
+
   if (editing) {
     return (
       <ProfileEditor
@@ -111,7 +162,7 @@ export default function EmailProfiles({ host }: { host: string }) {
         >
           <IconButton icon="refresh" label={t("common.refresh")} onClick={reload} disabled={loading} />
           {count > 0 && (
-            <Button icon="add" onClick={() => setEditing({ ...EMPTY })} disabled={full} title={full ? t("profiles.full") : undefined}>
+            <Button icon="add" onClick={() => setWizard("choose")} disabled={full} title={full ? t("profiles.full") : undefined}>
               {t("profiles.add")}
             </Button>
           )}
@@ -122,7 +173,7 @@ export default function EmailProfiles({ host }: { host: string }) {
         {data && data.length === 0 && (
           <div className="card">
             <EmptyState icon="contact_mail" title={t("profiles.empty")} body={t("profiles.emptyBody")}>
-              <Button icon="add" onClick={() => setEditing({ ...EMPTY })}>
+              <Button icon="add" onClick={() => setWizard("choose")}>
                 {t("profiles.createFirst")}
               </Button>
             </EmptyState>
@@ -223,7 +274,7 @@ function ProfileEditor({
   const [error, setError] = useState<AppError | null>(null);
 
   const set = <K extends keyof EmailAccount>(k: K, v: EmailAccount[K]) => setA((prev) => ({ ...prev, [k]: v }));
-  const preset = PRESETS.find((p) => p.server === a.smtpServer && p.port === a.port);
+  const preset = providerForServer(a.smtpServer, a.port);
 
   async function save(e: React.FormEvent) {
     e.preventDefault();
@@ -280,12 +331,12 @@ function ProfileEditor({
             <h2 className="form-legend">{t("profiles.server")}</h2>
             <p className="section-hint">{t("profiles.presetsHint")}</p>
             <div className="chips">
-              {PRESETS.map((p) => {
-                const on = preset === p;
+              {PROVIDERS.map((p) => {
+                const on = preset?.id === p.id;
                 return (
                   <button
                     type="button"
-                    key={p.label}
+                    key={p.id}
                     className={on ? "chip ripple selected has-icon" : "chip ripple"}
                     aria-pressed={on}
                     onClick={() => setA((prev) => ({ ...prev, smtpServer: p.server, port: p.port, useSsl: p.ssl }))}
@@ -398,6 +449,219 @@ function ProfileEditor({
           </Button>
           <Button type="submit" icon={isNew ? "add" : "check"} busy={saving} disabled={saving}>
             {saving ? t("common.saving") : isNew ? t("profiles.createAction") : t("common.save")}
+          </Button>
+        </div>
+      </form>
+    </section>
+  );
+}
+
+function ProviderPicker({
+  onPick,
+  onOther,
+  onCancel,
+}: {
+  onPick: (p: EmailProvider) => void;
+  onOther: () => void;
+  onCancel: () => void;
+}) {
+  const { t } = useI18n();
+  return (
+    <section className="page">
+      <PageHeader
+        lead={<IconButton icon="arrow_back" label={t("common.back")} onClick={onCancel} />}
+        title={t("emailSetup.chooseTitle")}
+        subtitle={t("emailSetup.chooseSubtitle")}
+      />
+      <div className="card outlined">
+        <ul className="list">
+          {PROVIDERS.map((p) => (
+            <li key={p.id}>
+              <button type="button" className="list-row ripple" onClick={() => onPick(p)}>
+                <span className="avatar" aria-hidden>
+                  {p.label.charAt(0)}
+                </span>
+                <span className="body">
+                  <span className="headline">{p.label}</span>
+                  <span className="supporting">{p.domains.length ? p.domains.slice(0, 3).join(", ") : p.server}</span>
+                </span>
+                <Icon name="chevron_right" className="lead" />
+              </button>
+            </li>
+          ))}
+          <li>
+            <button type="button" className="list-row ripple" onClick={onOther}>
+              <span className="avatar" aria-hidden>
+                <Icon name="dns" />
+              </span>
+              <span className="body">
+                <span className="headline">{t("emailSetup.other")}</span>
+                <span className="supporting">{t("emailSetup.otherBody")}</span>
+              </span>
+              <Icon name="chevron_right" className="lead" />
+            </button>
+          </li>
+        </ul>
+      </div>
+    </section>
+  );
+}
+
+function QuickSetup({
+  host,
+  provider,
+  onBack,
+  onSwitch,
+  onAdvanced,
+  onCreated,
+}: {
+  host: string;
+  provider: EmailProvider;
+  onBack: () => void;
+  onSwitch: (p: EmailProvider) => void;
+  onAdvanced: (a: EmailAccount) => void;
+  onCreated: (a: EmailAccount) => void;
+}) {
+  const { t } = useI18n();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [name, setName] = useState("");
+  const [nameTouched, setNameTouched] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<AppError | null>(null);
+
+  const displayName = nameTouched ? name : defaultDisplayName(email);
+  const detected = providerForEmail(email);
+  const mismatch = detected && detected.id !== provider.id ? detected : null;
+
+  function account(): EmailAccount {
+    const addr = email.trim();
+    return {
+      ...EMPTY,
+      displayName: displayName.trim() || defaultDisplayName(addr),
+      emailAddress: addr,
+      smtpServer: provider.server,
+      port: provider.port,
+      useSsl: provider.ssl,
+      username: addr,
+      password: provider.appPassword ? cleanAppPassword(password) : password,
+    };
+  }
+
+  async function connect(e: React.FormEvent) {
+    e.preventDefault();
+    setSaving(true);
+    setError(null);
+    const a = account();
+    try {
+      const id = await api.saveEmailAccount(host, a);
+      onCreated({ ...a, id, password: null });
+    } catch (err) {
+      setError(toAppError(err));
+      setSaving(false);
+    }
+  }
+
+  const steps = provider.appPassword
+    ? Array.from({ length: STEP_COUNT }, (_, i) => t(`emailSetup.steps.${provider.id}${i + 1}`))
+    : [];
+
+  return (
+    <section className="page">
+      <PageHeader
+        lead={<IconButton icon="arrow_back" label={t("common.back")} onClick={onBack} disabled={saving} />}
+        title={t("emailSetup.setupTitle", { provider: provider.label })}
+        subtitle={t("emailSetup.setupSubtitle")}
+      />
+
+      <ErrorBanner error={error} />
+
+      <form onSubmit={connect}>
+        <div className="card form-card">
+          <section className="form-section">
+            <Field label={t("emailSetup.email", { provider: provider.label })}>
+              <input
+                required
+                autoFocus
+                type="email"
+                maxLength={50}
+                spellCheck={false}
+                autoCapitalize="off"
+                autoComplete="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
+            </Field>
+            {mismatch && (
+              <div className="banner info" role="status">
+                <Icon name="info" />
+                <span className="banner-text">{t("emailSetup.wrongProvider", { provider: mismatch.label })}</span>
+                <Button variant="text" onClick={() => onSwitch(mismatch)}>
+                  {t("emailSetup.switchProvider", { provider: mismatch.label })}
+                </Button>
+              </div>
+            )}
+          </section>
+
+          <section className="form-section">
+            <h2 className="form-legend">{provider.appPassword ? t("emailSetup.appPassword") : t("emailSetup.password")}</h2>
+            {provider.warning && (
+              <div className="banner warn" role="note">
+                <Icon name="warning" />
+                <span className="banner-text">{t("emailSetup.warnOutlook")}</span>
+              </div>
+            )}
+            {steps.length > 0 && (
+              <ol className="setup-steps">
+                {steps.map((s, i) => (
+                  <li key={i}>{s}</li>
+                ))}
+              </ol>
+            )}
+            {provider.helpUrl && (
+              <div>
+                <Button variant="outlined" icon="open_in_new" onClick={() => openExternal(provider.helpUrl!)}>
+                  {t("emailSetup.openPage")}
+                </Button>
+              </div>
+            )}
+            <Field
+              label={provider.appPassword ? t("emailSetup.appPassword") : t("emailSetup.password")}
+              hint={provider.appPassword ? t("emailSetup.spacesRemoved") : t("emailSetup.passwordHint")}
+            >
+              <input
+                required
+                type="password"
+                maxLength={provider.appPassword ? 64 : 50}
+                autoComplete="new-password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
+            </Field>
+          </section>
+
+          <section className="form-section">
+            <Field label={t("emailSetup.displayName")} hint={t("profiles.displayNameHint")} counter={`${displayName.length}/25`}>
+              <input
+                required
+                maxLength={25}
+                value={displayName}
+                onChange={(e) => {
+                  setNameTouched(true);
+                  setName(e.target.value);
+                }}
+              />
+            </Field>
+          </section>
+        </div>
+
+        <div className="form-bar">
+          <Button variant="text" icon="tune" onClick={() => onAdvanced(account())} disabled={saving}>
+            {t("emailSetup.advanced")}
+          </Button>
+          <span className="grow" />
+          <Button type="submit" icon="link" busy={saving} disabled={saving}>
+            {saving ? t("emailSetup.connecting") : t("emailSetup.connect")}
           </Button>
         </div>
       </form>

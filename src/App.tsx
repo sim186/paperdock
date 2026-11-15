@@ -355,7 +355,7 @@ function Shell() {
             )}
             {shown("overview") && (
               <div className="tab-panel" hidden={activeTab !== "overview"}>
-                <OverviewView key={device.host} device={device} profile={profile} />
+                <OverviewView key={device.host} device={device} profile={profile} onPickDevice={openPicker} />
               </div>
             )}
             {shown("print") && f?.ipp && (

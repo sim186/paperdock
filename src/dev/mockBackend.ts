@@ -142,7 +142,8 @@ mockIPC(
           wsscanUrl: "http://192.168.1.84:3910/",
         };
       case "device_overview":
-        await wait(400);
+        // `?slow` keeps the printer silent for 20 s (waiting states of the overview).
+        await wait(q.has("slow") ? 20000 : 400);
         return {
           model: "HP LaserJet 200 colorMFP M276n",
           state: "idle",

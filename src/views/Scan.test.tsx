@@ -47,6 +47,17 @@ beforeEach(() => {
 afterEach(() => { cleanup(); vi.restoreAllMocks(); vi.unstubAllGlobals(); });
 
 describe("scanning documents", () => {
+  it("does not print a placeholder when the feeder capacity is unknown", async () => {
+    caps.adfCapacity = null as unknown as number;
+    try {
+      showScan();
+      expect(await screen.findByText(/^Put the sheets in the feeder/)).toBeInTheDocument();
+      expect(screen.queryByText(/up to \?/)).not.toBeInTheDocument();
+    } finally {
+      caps.adfCapacity = 20;
+    }
+  });
+
   it("keeps blank-page removal off for new preferences and explains its risk", async () => {
     showScan();
     const toggle = await screen.findByRole("switch", { name: /Remove blank pages/i });

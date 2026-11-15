@@ -147,8 +147,8 @@ p {
 }
 .headline-s,
 h1 {
-  font-size: 24px;
-  line-height: 32px;
+  font-size: 20px;
+  line-height: 28px;
   font-weight: 400;
   letter-spacing: 0;
 }
@@ -259,25 +259,25 @@ h2 {
 
 .app {
   display: grid;
-  grid-template-columns: 280px 1fr;
+  grid-template-columns: 228px 1fr;
   height: 100vh;
 }
 
 .drawer {
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  padding: 12px;
+  gap: 2px;
+  padding: 8px 10px 10px;
   overflow-y: auto;
 }
 
 .brand {
   display: flex;
   align-items: center;
-  gap: 12px;
-  height: 56px;
-  padding: 0 16px;
-  font-size: 18px;
+  gap: 10px;
+  height: 44px;
+  padding: 0 12px;
+  font-size: 16px;
   font-weight: 600;
   font-stretch: 112%;
   letter-spacing: -0.01em;
@@ -309,10 +309,10 @@ h2 {
   display: flex;
   align-items: center;
   gap: 12px;
-  margin: 4px 0 12px;
-  padding: 12px 12px 12px 16px;
-  min-height: 64px;
-  border-radius: var(--r-lg);
+  margin: 2px 0 8px;
+  padding: 6px 8px 6px 12px;
+  min-height: 48px;
+  border-radius: var(--r-md);
   background: var(--surface-container-highest);
   cursor: pointer;
   position: relative;
@@ -343,8 +343,8 @@ h2 {
   display: flex;
   align-items: center;
   gap: 12px;
-  height: 56px;
-  padding: 0 24px 0 16px;
+  height: 36px;
+  padding: 0 16px 0 12px;
   border-radius: 999px;
   font-weight: 500;
   color: var(--on-surface-variant);
@@ -371,7 +371,7 @@ h2 {
 
 .drawer-foot {
   margin-top: auto;
-  padding: 12px 4px 4px;
+  padding: 8px 2px 2px;
   --field-bg: var(--surface-container);
 }
 .drawer-foot .lang-toggle {
@@ -380,8 +380,8 @@ h2 {
 
 /* the page sits on a raised, rounded surface — M3 "pane" */
 .pane {
-  margin: 12px 12px 12px 0;
-  border-radius: var(--r-xl);
+  margin: 8px 8px 8px 0;
+  border-radius: var(--r-lg);
   background: var(--surface);
   overflow-y: auto;
   position: relative;
@@ -389,7 +389,7 @@ h2 {
 }
 
 .page {
-  padding: 24px 32px 40px;
+  padding: 18px 24px 32px;
   max-width: 880px;
 }
 .page.wide {
@@ -399,9 +399,9 @@ h2 {
 .page-head {
   display: flex;
   align-items: flex-start;
-  gap: 16px;
-  margin-bottom: 24px;
-  min-height: 48px;
+  gap: 12px;
+  margin-bottom: 16px;
+  min-height: 36px;
 }
 .page-head h1 {
   overflow-wrap: anywhere;
@@ -416,14 +416,14 @@ h2 {
   gap: 8px;
   flex: none;
 }
-/* 40px controls centered on the 32px title line */
+/* 32px controls centered on the 28px title line */
 .page-head-actions,
 .page-head > .icon-btn {
-  margin-top: -4px;
+  margin-top: -2px;
 }
 
 .section-title {
-  margin: 32px 0 12px;
+  margin: 24px 0 10px;
 }
 
 .top-progress {
@@ -538,11 +538,11 @@ h2 {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  height: 40px;
-  padding: 0 24px;
+  gap: 6px;
+  height: 32px;
+  padding: 0 16px;
   border-radius: 999px;
-  font-size: 14px;
+  font-size: 13px;
   line-height: 20px;
   font-weight: 500;
   letter-spacing: 0.007em;
@@ -614,10 +614,10 @@ h2 {
   box-sizing: border-box;
   display: inline-flex;
   align-items: center;
-  gap: 12px;
-  height: 56px;
-  padding: 0 20px 0 16px;
-  border-radius: var(--r-lg);
+  gap: 8px;
+  height: 44px;
+  padding: 0 18px 0 14px;
+  border-radius: var(--r-md);
   background: var(--primary-container);
   color: var(--on-primary-container);
   font-weight: 500;
@@ -645,8 +645,8 @@ h2 {
   box-sizing: border-box;
   display: inline-grid;
   place-items: center;
-  width: 40px;
-  height: 40px;
+  width: 32px;
+  height: 32px;
   border-radius: 999px;
   color: var(--on-surface-variant);
   cursor: pointer;
@@ -662,12 +662,15 @@ h2 {
   background: var(--secondary-container);
   color: var(--on-secondary-container);
 }
+.icon-btn .msr {
+  font-size: 20px;
+}
 .icon-btn.small {
-  width: 32px;
-  height: 32px;
+  width: 28px;
+  height: 28px;
 }
 .icon-btn.small .msr {
-  font-size: 20px;
+  font-size: 18px;
 }
 .icon-btn:disabled {
   cursor: default;
@@ -773,7 +776,7 @@ button.chip:focus-visible {
 
 .segmented {
   display: inline-flex;
-  height: 40px;
+  height: 32px;
   border: 1px solid var(--outline);
   border-radius: 999px;
   overflow: hidden;
@@ -788,8 +791,9 @@ button.chip:focus-visible {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  padding: 0 16px;
+  gap: 6px;
+  padding: 0 14px;
+  font-size: 13px;
   font-weight: 500;
   color: var(--on-surface);
   cursor: pointer;
@@ -843,7 +847,7 @@ button.chip:focus-visible {
 .tf-label {
   position: absolute;
   top: -8px;
-  left: 12px;
+  left: 8px;
   padding: 0 4px;
   font-size: 12px;
   line-height: 16px;
@@ -866,16 +870,16 @@ button.chip:focus-visible {
   flex: 1;
   min-width: 0;
   width: 100%;
-  min-height: 52px;
-  padding: 14px 16px;
+  min-height: 36px;
+  padding: 8px 12px;
   font: inherit;
-  font-size: 16px;
-  line-height: 24px;
+  font-size: 14px;
+  line-height: 20px;
   color: var(--on-surface);
   caret-color: var(--primary);
 }
 .tf-box select {
-  padding-right: 44px;
+  padding-right: 36px;
   cursor: pointer;
 }
 .tf-box select option {
@@ -885,23 +889,23 @@ button.chip:focus-visible {
 .tf-box textarea {
   white-space: pre-wrap;
   resize: vertical;
-  min-height: 104px;
+  min-height: 80px;
 }
 .tf-box .trailing {
   position: absolute;
-  right: 12px;
+  right: 8px;
   pointer-events: none;
   color: var(--on-surface-variant);
 }
 .tf.dense .tf-box input,
 .tf.dense .tf-box select {
-  min-height: 40px;
-  padding: 8px 12px;
-  font-size: 14px;
+  min-height: 30px;
+  padding: 5px 10px;
+  font-size: 13px;
   line-height: 20px;
 }
 .tf.dense .tf-box select {
-  padding-right: 40px;
+  padding-right: 32px;
 }
 .tf.dense .trailing {
   right: 8px;
@@ -909,7 +913,7 @@ button.chip:focus-visible {
 .tf-support {
   display: flex;
   gap: 16px;
-  padding: 0 16px;
+  padding: 0 12px;
   font-size: 12px;
   line-height: 16px;
   color: var(--on-surface-variant);
@@ -938,7 +942,7 @@ button.chip:focus-visible {
   display: flex;
   align-items: center;
   gap: 16px;
-  min-height: 56px;
+  min-height: 40px;
   cursor: pointer;
 }
 .switch-row .switch-text {
@@ -963,8 +967,8 @@ input.switch {
   -webkit-appearance: none;
   flex: none;
   margin: 0;
-  width: 52px;
-  height: 32px;
+  width: 40px;
+  height: 24px;
   border-radius: 999px;
   border: 2px solid var(--outline);
   background: var(--surface-container-highest);
@@ -976,9 +980,9 @@ input.switch::before {
   content: "";
   position: absolute;
   top: 50%;
-  left: 6px;
-  width: 16px;
-  height: 16px;
+  left: 4px;
+  width: 12px;
+  height: 12px;
   border-radius: 50%;
   background: var(--outline);
   transform: translateY(-50%);
@@ -989,18 +993,18 @@ input.switch:checked {
   border-color: var(--primary);
 }
 input.switch:checked::before {
-  left: 22px;
-  width: 24px;
-  height: 24px;
+  left: 18px;
+  width: 16px;
+  height: 16px;
   background: var(--on-primary);
 }
 input.switch:active:not(:disabled)::before {
-  width: 28px;
-  height: 28px;
-  left: 2px;
+  width: 18px;
+  height: 18px;
+  left: 1px;
 }
 input.switch:checked:active:not(:disabled)::before {
-  left: 20px;
+  left: 17px;
 }
 input.switch:focus-visible {
   outline: 3px solid var(--primary);
@@ -1047,10 +1051,10 @@ input.switch:disabled {
   box-sizing: border-box;
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 12px;
   width: 100%;
-  min-height: 56px;
-  padding: 8px 24px 8px 16px;
+  min-height: 44px;
+  padding: 6px 16px 6px 12px;
   position: relative;
 }
 button.list-row {
@@ -1061,10 +1065,10 @@ button.list-row:focus-visible {
   outline-offset: -3px;
 }
 .list-row.three {
-  min-height: 88px;
+  min-height: 64px;
   align-items: flex-start;
-  padding-top: 12px;
-  padding-bottom: 12px;
+  padding-top: 10px;
+  padding-bottom: 10px;
 }
 .list-row .lead {
   color: var(--on-surface-variant);
@@ -1080,8 +1084,9 @@ button.list-row:focus-visible {
   text-overflow: ellipsis;
 }
 .list-row .headline {
-  font-size: 16px;
-  line-height: 24px;
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 500;
   white-space: nowrap;
 }
 .list-row .supporting {
@@ -1103,8 +1108,8 @@ button.list-row:focus-visible {
 }
 
 .avatar {
-  width: 40px;
-  height: 40px;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
   display: grid;
   place-items: center;
@@ -1475,9 +1480,9 @@ dialog.dialog[open] {
 .status-card {
   display: flex;
   align-items: flex-start;
-  gap: 16px;
-  padding: 20px;
-  border-radius: var(--r-lg);
+  gap: 12px;
+  padding: 12px 16px;
+  border-radius: var(--r-md);
   background: var(--success-container);
   color: var(--on-success-container);
 }
@@ -1490,7 +1495,7 @@ dialog.dialog[open] {
   color: var(--on-error-container);
 }
 .status-card > .msr {
-  font-size: 32px;
+  font-size: 26px;
 }
 .status-card ul {
   list-style: none;
@@ -1506,6 +1511,72 @@ dialog.dialog[open] {
   gap: 8px;
 }
 
+/* Overview while waiting: last known state dimmed, or an empty skeleton */
+.overview-body.stale {
+  opacity: 0.55;
+  filter: saturate(0.4);
+  transition: opacity 0.3s var(--ease), filter 0.3s var(--ease);
+}
+.stale-note {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: -4px 0 12px;
+  color: var(--on-surface-variant);
+}
+.slow-hint .banner-text p + p {
+  margin-top: 2px;
+}
+.skeleton-card {
+  align-items: center;
+  background: var(--surface-container-low);
+  color: var(--on-surface-variant);
+}
+.spinner-dot {
+  width: 10px;
+  height: 10px;
+  margin: 0 4px;
+  border-radius: 50%;
+  background: var(--primary);
+  animation: dot-pulse 1.4s ease-in-out infinite;
+}
+@keyframes dot-pulse {
+  0%, 100% { opacity: 0.25; transform: scale(0.8); }
+  50% { opacity: 1; transform: scale(1.1); }
+}
+.overview-skeleton .supply-info {
+  gap: 10px;
+  padding-top: 4px;
+}
+.skeleton-line {
+  display: block;
+  height: 10px;
+  border-radius: 999px;
+  background: var(--surface-container-highest);
+}
+.skeleton-line.tall {
+  height: 22px;
+}
+/* empty cartridges slowly filling and draining, one after the other */
+.cartridge-fill.skeleton-fill {
+  background: color-mix(in srgb, var(--on-surface) 14%, transparent);
+  animation: toner-fill 2.8s var(--ease) infinite;
+}
+@keyframes toner-fill {
+  0% { height: 8%; }
+  50% { height: 70%; }
+  100% { height: 8%; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .spinner-dot,
+  .cartridge-fill.skeleton-fill {
+    animation: none;
+  }
+  .cartridge-fill.skeleton-fill {
+    height: 30%;
+  }
+}
+
 /* Supplies: tall cartridges filled from the bottom with their real color. */
 .supplies {
   display: grid;
@@ -1516,15 +1587,15 @@ dialog.dialog[open] {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr);
   align-items: start;
-  gap: 12px 16px;
-  padding: 16px;
-  border-radius: var(--r-lg);
+  gap: 10px 14px;
+  padding: 12px;
+  border-radius: var(--r-md);
   background: var(--surface-container-low);
 }
 .cartridge {
   flex: none;
-  width: 40px;
-  height: 128px;
+  width: 32px;
+  height: 100px;
   border-radius: 10px 10px 14px 14px;
   background: var(--surface-container-highest);
   position: relative;
@@ -1559,15 +1630,15 @@ dialog.dialog[open] {
   gap: 2px;
 }
 .supply-level {
-  font-size: 36px;
-  line-height: 44px;
+  font-size: 28px;
+  line-height: 34px;
   font-weight: 400;
   font-stretch: 90%;
   font-variant-numeric: tabular-nums;
   letter-spacing: -0.01em;
 }
 .supply-level small {
-  font-size: 18px;
+  font-size: 15px;
   margin-left: 2px;
   color: var(--on-surface-variant);
 }
@@ -1598,7 +1669,7 @@ dialog.dialog[open] {
   display: grid;
   grid-template-columns: minmax(140px, 200px) 1fr;
   gap: 16px;
-  padding: 12px 16px;
+  padding: 8px 14px;
   align-items: baseline;
 }
 .facts > div + div {
@@ -1863,6 +1934,13 @@ dialog.dialog[open] {
     grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
     gap: 20px 16px;
   }
+  /* in the grid the guide link is its own cell: line it up with the field
+     row next to it, not with the field plus its hint */
+  .scan-settings .duplex-guide-link {
+    align-self: start;
+    min-height: 38px;
+    margin-top: 0;
+  }
   .scan-settings .switches {
     grid-column: 1 / -1;
     flex-direction: row;
@@ -1876,14 +1954,14 @@ dialog.dialog[open] {
 .form-card {
   display: flex;
   flex-direction: column;
-  gap: 24px;
-  padding: 24px;
+  gap: 18px;
+  padding: 18px 20px;
   border-radius: var(--r-lg);
 }
 .form-section {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 14px;
   border: none;
   margin: 0;
   padding: 0;
@@ -1891,11 +1969,11 @@ dialog.dialog[open] {
 }
 .form-section + .form-section {
   border-top: 1px solid var(--outline-variant);
-  padding-top: 24px;
+  padding-top: 18px;
 }
 .form-legend {
   margin: 0;
-  font-size: 16px;
+  font-size: 14px;
   line-height: 24px;
   font-weight: 500;
 }
@@ -1906,7 +1984,7 @@ dialog.dialog[open] {
 .grid-2 {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 16px;
+  gap: 14px;
 }
 .grid-2.port {
   grid-template-columns: 1fr 140px;
@@ -1931,6 +2009,17 @@ dialog.dialog[open] {
   background: var(--surface-container-high);
   box-shadow: var(--elev-1);
 }
+.setup-steps {
+  margin: 0;
+  padding-left: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.setup-steps li::marker {
+  color: var(--primary);
+  font-weight: 500;
+}
 .form-bar .grow {
   color: var(--on-surface-variant);
 }
@@ -1939,9 +2028,9 @@ dialog.dialog[open] {
   display: flex;
   align-items: center;
   gap: 16px;
-  padding: 16px 20px 16px 24px;
-  border-radius: var(--r-lg);
-  margin-bottom: 16px;
+  padding: 12px 16px 12px 20px;
+  border-radius: var(--r-md);
+  margin-bottom: 12px;
   background: var(--primary-container);
   color: var(--on-primary-container);
   cursor: pointer;
@@ -2010,13 +2099,13 @@ dialog.dialog[open] {
   min-width: 0;
 }
 .seg-field .segmented {
-  height: 54px;
+  height: 38px;
   border-radius: var(--r-xs);
 }
 .seg-field .seg-label {
   position: absolute;
   top: -8px;
-  left: 12px;
+  left: 8px;
   z-index: 1;
   padding: 0 4px;
   font-size: 12px;

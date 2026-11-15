@@ -572,7 +572,7 @@ export default function ScanView({
                   <div className="cta-text">
                     <p className="body-l">
                       {source === "Feeder"
-                        ? t("scan.loadFeeder", { n: caps.adfCapacity ?? "?" })
+                        ? caps.adfCapacity ? t("scan.loadFeeder", { n: caps.adfCapacity }) : t("scan.loadFeederUnknown")
                         : t("scan.loadGlass")}
                     </p>
                     {source === "Feeder" && adfEmpty && (
