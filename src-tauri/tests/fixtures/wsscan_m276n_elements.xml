@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<SOAP-ENV:Envelope xmlns:SOAP-ENV="http://www.w3.org/2003/05/soap-envelope" xmlns:SOAP-ENC="http://www.w3.org/2003/05/soap-encoding" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xop="http://www.w3.org/2004/08/xop/include" xmlns:wsa="http://schemas.xmlsoap.org/ws/2004/08/addressing" xmlns:wse="http://schemas.xmlsoap.org/ws/2004/08/eventing" xmlns:WSDScannerService="http://schemas.microsoft.com/windows/2006/08/wdp/scan">
+	<SOAP-ENV:Header>
+		<wsa:MessageID SOAP-ENV:mustUnderstand="true">urn:uuid:62e72724-bfac-1f26-8bdc-c4346b1b3aaf</wsa:MessageID>
+		<wsa:RelatesTo SOAP-ENV:mustUnderstand="true">urn:uuid:11111111-2222-3333-4444-555555555559</wsa:RelatesTo>
+		<wsa:To SOAP-ENV:mustUnderstand="true">http://schemas.xmlsoap.org/ws/2004/08/addressing/role/anonymous</wsa:To>
+		<wsa:Action SOAP-ENV:mustUnderstand="true">http://schemas.microsoft.com/windows/2006/08/wdp/scan/GetScannerElementsResponse</wsa:Action></SOAP-ENV:Header>
+	<SOAP-ENV:Body>
+		<WSDScannerService:GetScannerElementsResponse>
+			<WSDScannerService:ScannerElements>
+				<WSDScannerService:ElementData Valid="true" Name="WSDScannerService:ScannerDescription">
+					<WSDScannerService:ScannerDescription>
+						<WSDScannerService:ScannerName>NPI1B3AAF (HP LaserJet 200 colorMFP M276n)</WSDScannerService:ScannerName></WSDScannerService:ScannerDescription></WSDScannerService:ElementData>
+				<WSDScannerService:ElementData Valid="true" Name="WSDScannerService:ScannerConfiguration">
+					<WSDScannerService:ScannerConfiguration>
+						<WSDScannerService:DeviceSettings>
+							<WSDScannerService:FormatsSupported>
+								<WSDScannerService:FormatValue>png</WSDScannerService:FormatValue></WSDScannerService:FormatsSupported>
+							<WSDScannerService:CompressionQualityFactorSupported>
+								<WSDScannerService:MinValue>0</WSDScannerService:MinValue>
+								<WSDScannerService:MaxValue>100</WSDScannerService:MaxValue></WSDScannerService:CompressionQualityFactorSupported>
+							<WSDScannerService:ContentTypesSupported>
+								<WSDScannerService:ContentTypeValue>Auto</WSDScannerService:ContentTypeValue>
+								<WSDScannerService:ContentTypeValue>Text</WSDScannerService:ContentTypeValue>
+								<WSDScannerService:ContentTypeValue>Photo</WSDScannerService:ContentTypeValue>
+								<WSDScannerService:ContentTypeValue>Mixed</WSDScannerService:ContentTypeValue></WSDScannerService:ContentTypesSupported>
+							<WSDScannerService:DocumentSizeAutoDetectSupported>false</WSDScannerService:DocumentSizeAutoDetectSupported>
+							<WSDScannerService:AutoExposureSupported>true</WSDScannerService:AutoExposureSupported>
+							<WSDScannerService:BrightnessSupported>false</WSDScannerService:BrightnessSupported>
+							<WSDScannerService:ContrastSupported>false</WSDScannerService:ContrastSupported>
+							<WSDScannerService:ScalingRangeSupported>
+								<WSDScannerService:ScalingWidth>
+									<WSDScannerService:MinValue>50</WSDScannerService:MinValue>
+									<WSDScannerService:MaxValue>200</WSDScannerService:MaxValue></WSDScannerService:ScalingWidth>
+								<WSDScannerService:ScalingHeight>
+									<WSDScannerService:MinValue>50</WSDScannerService:MinValue>
+									<WSDScannerService:MaxValue>200</WSDScannerService:MaxValue></WSDScannerService:ScalingHeight></WSDScannerService:ScalingRangeSupported>
+							<WSDScannerService:RotationsSupported>
+								<WSDScannerService:RotationValue>0</WSDScannerService:RotationValue></WSDScannerService:RotationsSupported></WSDScannerService:DeviceSettings>
+						<WSDScannerService:Platen>
+							<WSDScannerService:PlatenOpticalResolution>
+								<WSDScannerService:Width>300</WSDScannerService:Width>
+								<WSDScannerService:Height>300</WSDScannerService:Height></WSDScannerService:PlatenOpticalResolution>
+							<WSDScannerService:PlatenResolutions>
+								<WSDScannerService:Widths>
+									<WSDScannerService:Width>75</WSDScannerService:Width>
+									<WSDScannerService:Width>150</WSDScannerService:Width>
+									<WSDScannerService:Width>300</WSDScannerService:Width></WSDScannerService:Widths>
+								<WSDScannerService:Heights>
+									<WSDScannerService:Height>75</WSDScannerService:Height>
+									<WSDScannerService:Height>150</WSDScannerService:Height>
+									<WSDScannerService:Height>300</WSDScannerService:Height></WSDScannerService:Heights></WSDScannerService:PlatenResolutions>
+							<WSDScannerService:PlatenColor>
+								<WSDScannerService:ColorEntry>Grayscale8</WSDScannerService:ColorEntry>
+								<WSDScannerService:ColorEntry>RGB24</WSDScannerService:ColorEntry></WSDScannerService:PlatenColor>
+							<WSDScannerService:PlatenMinimumSize>
+								<WSDScannerService:Width>1920</WSDScannerService:Width>
+								<WSDScannerService:Height>1920</WSDScannerService:Height></WSDScannerService:PlatenMinimumSize>
+							<WSDScannerService:PlatenMaximumSize>
+								<WSDScannerService:Width>8267</WSDScannerService:Width>
+								<WSDScannerService:Height>11690</WSDScannerService:Height></WSDScannerService:PlatenMaximumSize></WSDScannerService:Platen>
+						<WSDScannerService:ADF>
+							<WSDScannerService:ADFSupportsDuplex>false</WSDScannerService:ADFSupportsDuplex>
+							<WSDScannerService:ADFFront>
+								<WSDScannerService:ADFOpticalResolution>
+									<WSDScannerService:Width>300</WSDScannerService:Width>
+									<WSDScannerService:Height>300</WSDScannerService:Height></WSDScannerService:ADFOpticalResolution>
+								<WSDScannerService:ADFResolutions>
+									<WSDScannerService:Widths>
+									<WSDScannerService:Width>75</WSDScannerService:Width>
+									<WSDScannerService:Width>150</WSDScannerService:Width>
+									<WSDScannerService:Width>300</WSDScannerService:Width></WSDScannerService:Widths>
+									<WSDScannerService:Heights>
+									<WSDScannerService:Height>75</WSDScannerService:Height>
+									<WSDScannerService:Height>150</WSDScannerService:Height>
+									<WSDScannerService:Height>300</WSDScannerService:Height></WSDScannerService:Heights></WSDScannerService:ADFResolutions>
+								<WSDScannerService:ADFColor>
+									<WSDScannerService:ColorEntry>Grayscale8</WSDScannerService:ColorEntry>
+									<WSDScannerService:ColorEntry>RGB24</WSDScannerService:ColorEntry></WSDScannerService:ADFColor>
+								<WSDScannerService:ADFMinimumSize>
+									<WSDScannerService:Width>1920</WSDScannerService:Width>
+									<WSDScannerService:Height>1920</WSDScannerService:Height></WSDScannerService:ADFMinimumSize>
+								<WSDScannerService:ADFMaximumSize>
+									<WSDScannerService:Width>8267</WSDScannerService:Width>
+									<WSDScannerService:Height>11690</WSDScannerService:Height></WSDScannerService:ADFMaximumSize></WSDScannerService:ADFFront></WSDScannerService:ADF></WSDScannerService:ScannerConfiguration></WSDScannerService:ElementData>
+				<WSDScannerService:ElementData Valid="true" Name="WSDScannerService:ScannerStatus">
+					<WSDScannerService:ScannerStatus>
+						<WSDScannerService:ScannerCurrentTime>1970-01-01T00:00:14</WSDScannerService:ScannerCurrentTime>
+						<WSDScannerService:ScannerState>Idle</WSDScannerService:ScannerState>
+						<WSDScannerService:ScannerStateReasons>
+							<WSDScannerService:ScannerStateReason>None</WSDScannerService:ScannerStateReason></WSDScannerService:ScannerStateReasons>
+						<WSDScannerService:ActiveConditions></WSDScannerService:ActiveConditions></WSDScannerService:ScannerStatus></WSDScannerService:ElementData></WSDScannerService:ScannerElements></WSDScannerService:GetScannerElementsResponse></SOAP-ENV:Body></SOAP-ENV:Envelope>

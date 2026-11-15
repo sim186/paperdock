@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>NSLocalNetworkUsageDescription</key>
+  <string>Needed to find printers and scanners on your network and talk to them.</string>
+  <key>NSBonjourServices</key>
+  <array>
+    <string>_ipp._tcp</string>
+    <string>_ipps._tcp</string>
+    <string>_uscan._tcp</string>
+    <string>_uscans._tcp</string>
+    <string>_pdl-datastream._tcp</string>
+    <string>_printer._tcp</string>
+  </array>
+</dict>
+</plist>
