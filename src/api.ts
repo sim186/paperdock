@@ -232,6 +232,7 @@ export const api = {
   setScanToEmail: (host: string, settings: ScanToEmailSettings) =>
     invoke<void>("scan_to_email_set", { host, settings }),
 
+  closeStatus: () => invoke<{ unsavedPages: boolean; scanning: boolean }>("session_close_status"),
   scannerInfo: (d: Device) =>
     invoke<[ScannerCaps, ScannerStatus]>("scanner_info", { host: d.host, hints: d.hints }),
   scannerStatus: (d: Device) => invoke<ScannerStatus>("scanner_status", { host: d.host, hints: d.hints }),

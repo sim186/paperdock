@@ -34,6 +34,7 @@ jobs:
       - name: Frontend (typecheck + build)
         run: |
           npm ci
+          npm test
           npm run build
 
       - name: Rust tests

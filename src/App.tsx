@@ -6,11 +6,13 @@ import { SnackbarProvider, useSnackbar } from "./snackbar";
 import { I18nProvider, LANGS, Lang, useI18n } from "./i18n";
 import { ActivityProvider, useActivities } from "./activity";
 import { storageGet, storageSet } from "./storage";
+import { retainKnownScanner } from "./deviceProfile";
 import DevicePicker from "./views/Devices";
 import OverviewView from "./views/Overview";
 import EmailProfiles from "./views/EmailProfiles";
 import ScanToEmail from "./views/ScanToEmail";
 import ScanView from "./views/Scan";
+import CloseGuard from "./CloseGuard";
 import type { SourceDoc } from "./printing";
 // Printing pulls in pdf.js and pdf-lib: load it with the tab.
 const PrintView = lazy(() => import("./views/Print"));
@@ -46,6 +48,7 @@ export default function App() {
     <I18nProvider>
       <SnackbarProvider>
         <ActivityProvider>
+          <CloseGuard />
           <Shell />
         </ActivityProvider>
       </SnackbarProvider>
@@ -102,9 +105,11 @@ function Shell() {
       .probe(device)
       .then((p) => {
         if (cancelled) return;
-        saveProfile(device.host, p);
+        // A UDP discovery timeout is not proof that a known scanner disappeared.
+        const next = retainKnownScanner(loadProfiles()[device.host] ?? cached, p);
+        saveProfile(device.host, next);
         // Same answer: keep the object so the screens don't reload.
-        setProfile((old) => (old && JSON.stringify(old) === JSON.stringify(p) ? old : p));
+        setProfile((old) => (old && JSON.stringify(old) === JSON.stringify(next) ? old : next));
       })
       .catch((e) => {
         if (cancelled) return;

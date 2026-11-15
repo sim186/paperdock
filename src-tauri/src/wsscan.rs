@@ -6,7 +6,7 @@
 //! address -> WS-Transfer Get -> scanner service URL -> GetScannerElements /
 //! CreateScanJob / RetrieveImage (MTOM multipart) until no images remain.
 
-use std::net::UdpSocket;
+use std::net::{SocketAddr, ToSocketAddrs, UdpSocket};
 use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
@@ -106,22 +106,34 @@ fn probe(host: &str) -> Result<Endpoint> {
         id = message_id()
     );
     let host = host.trim_start_matches('[').trim_end_matches(']').trim_end_matches('.');
-    let sock = UdpSocket::bind(if host.contains(':') { "[::]:0" } else { "0.0.0.0:0" })?;
-    sock.set_read_timeout(Some(Duration::from_millis(700)))?;
-    let target = if host.contains(':') { format!("[{host}]:3702") } else { format!("{host}:3702") };
+    let addresses: Vec<SocketAddr> = (host, 3702).to_socket_addrs()?.collect();
+    probe_addresses(&msg, addresses)
+}
+
+fn probe_addresses(msg: &str, mut addresses: Vec<SocketAddr>) -> Result<Endpoint> {
+    // Resolve first: a hostname may resolve to IPv6 even though it contains no colon.
+    // Prefer IPv4 when both families are available, then try IPv6 as a fallback.
+    addresses.sort_by_key(|addr| addr.is_ipv6());
     let mut buf = vec![0u8; 65535];
-    // UDP: retry a few times.
-    for _ in 0..4 {
-        sock.send_to(msg.as_bytes(), &target)?;
-        match sock.recv_from(&mut buf) {
-            Ok((n, _)) => {
-                let reply = String::from_utf8_lossy(&buf[..n]);
-                if let Some(ep) = parse_probe_match(&reply) {
-                    return Ok(ep);
-                }
-                eprintln!("[wsscan] unexpected probe reply: {}", reply.chars().take(300).collect::<String>());
+    for target in addresses {
+        let bind = if target.is_ipv6() { "[::]:0" } else { "0.0.0.0:0" };
+        let Ok(sock) = UdpSocket::bind(bind) else { continue };
+        sock.set_read_timeout(Some(Duration::from_millis(700)))?;
+        for _ in 0..4 {
+            if let Err(e) = sock.send_to(msg.as_bytes(), target) {
+                eprintln!("[wsscan] probe {target}: {e}");
+                break;
             }
-            Err(e) => eprintln!("[wsscan] probe {target}: {e}"),
+            match sock.recv_from(&mut buf) {
+                Ok((n, _)) => {
+                    let reply = String::from_utf8_lossy(&buf[..n]);
+                    if let Some(ep) = parse_probe_match(&reply) {
+                        return Ok(ep);
+                    }
+                    eprintln!("[wsscan] unexpected probe reply: {}", reply.chars().take(300).collect::<String>());
+                }
+                Err(e) => eprintln!("[wsscan] probe {target}: {e}"),
+            }
         }
     }
     Err(Error::Unsupported("wsscan"))
@@ -633,6 +645,23 @@ mod tests {
         let mut dup = req;
         dup.duplex = true;
         assert!(scan_ticket(&caps, &formats, &dup).is_err());
+    }
+
+    #[test]
+    fn probe_uses_ipv4_socket_when_hostname_resolves_to_both_families() {
+        let listener = UdpSocket::bind("127.0.0.1:0").unwrap();
+        listener.set_read_timeout(Some(Duration::from_secs(5))).unwrap();
+        let address = listener.local_addr().unwrap();
+        let responder = std::thread::spawn(move || {
+            let mut buf = [0u8; 128];
+            let (_, peer) = listener.recv_from(&mut buf).unwrap();
+            let reply = r#"<Envelope><ProbeMatch><EndpointReference><Address>urn:uuid:test</Address></EndpointReference><Types>ScanDeviceType</Types><XAddrs>http://127.0.0.1:1234/</XAddrs></ProbeMatch></Envelope>"#;
+            listener.send_to(reply.as_bytes(), peer).unwrap();
+        });
+        let ipv6 = "[::1]:3702".parse().unwrap();
+        let result = probe_addresses("probe", vec![ipv6, address]).unwrap();
+        assert_eq!(result.epr, "urn:uuid:test");
+        responder.join().unwrap();
     }
 
     #[test]

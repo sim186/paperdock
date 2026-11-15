@@ -296,6 +296,21 @@ fn scan_cancel(state: State<'_, AppState>) {
     state.cancel_scan.store(true, Ordering::SeqCst);
 }
 
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+struct CloseStatus {
+    unsaved_pages: bool,
+    scanning: bool,
+}
+
+#[tauri::command]
+fn session_close_status(state: State<'_, AppState>) -> CloseStatus {
+    CloseStatus {
+        unsaved_pages: lock(&state.session).has_unsaved_pages(),
+        scanning: state.scanning.load(Ordering::SeqCst),
+    }
+}
+
 #[tauri::command]
 fn session_get(state: State<'_, AppState>) -> SessionView {
     lock(&state.session).view()
@@ -354,12 +369,12 @@ enum OutputFormat {
 #[tauri::command]
 async fn session_save(state: State<'_, AppState>, format: OutputFormat, path: PathBuf) -> Result<Vec<String>> {
     // Encode under the lock (fast for PDF), write files outside it.
-    let output: Vec<(PathBuf, Vec<u8>)> = {
+    let (output, snapshot): (Vec<(PathBuf, Vec<u8>)>, _) = {
         let s = lock(&state.session);
         if s.is_empty() {
             return Err(Error::invalid("no_pages"));
         }
-        match format {
+        let output = match format {
             OutputFormat::Pdf => vec![(path.clone(), s.to_pdf()?)],
             OutputFormat::Jpeg => {
                 let pages = s.to_jpegs()?;
@@ -375,19 +390,22 @@ async fn session_save(state: State<'_, AppState>, format: OutputFormat, path: Pa
                         .collect()
                 }
             }
-        }
+        };
+        (output, s.snapshot())
     };
     // Disk writes block: keep them off the async runtime's threads.
-    tauri::async_runtime::spawn_blocking(move || {
+    let files = tauri::async_runtime::spawn_blocking(move || {
         let mut files = Vec::new();
         for (f, bytes) in output {
             std::fs::write(&f, bytes)?;
             files.push(f.display().to_string());
         }
-        Ok(files)
+        Ok::<_, Error>(files)
     })
     .await
-    .map_err(blocking_err)?
+    .map_err(blocking_err)??;
+    lock(&state.session).mark_saved(snapshot);
+    Ok(files)
 }
 
 /// Add a page from a file. Body: JPEG or PNG bytes; header `x-dpi`.
@@ -487,6 +505,7 @@ pub fn run() {
             scan_status,
             scan_cancel,
             session_get,
+            session_close_status,
             session_finish_fronts,
             session_rotate,
             session_delete,

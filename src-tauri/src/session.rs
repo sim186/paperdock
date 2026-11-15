@@ -27,6 +27,13 @@ pub struct Session {
     next_id: u64,
     /// Ids of the most recent front-side batch, awaiting its backs.
     pending_fronts: Option<Vec<u64>>,
+    saved_snapshot: Option<SessionSnapshot>,
+}
+
+#[derive(Clone, PartialEq, Eq)]
+pub struct SessionSnapshot {
+    pages: Vec<(u64, u16)>,
+    pending_fronts: Option<Vec<u64>>,
 }
 
 #[derive(Serialize, Clone)]
@@ -114,6 +121,21 @@ pub fn is_blank(img: &DynamicImage) -> bool {
 }
 
 impl Session {
+    pub fn snapshot(&self) -> SessionSnapshot {
+        SessionSnapshot {
+            pages: self.pages.iter().map(|p| (p.id, p.rotation)).collect(),
+            pending_fronts: self.pending_fronts.clone(),
+        }
+    }
+
+    pub fn mark_saved(&mut self, snapshot: SessionSnapshot) {
+        self.saved_snapshot = Some(snapshot);
+    }
+
+    pub fn has_unsaved_pages(&self) -> bool {
+        !self.pages.is_empty() && self.saved_snapshot.as_ref() != Some(&self.snapshot())
+    }
+
     fn push(&mut self, p: Prepared, dpi: u32) -> u64 {
         self.next_id += 1;
         let id = self.next_id;
@@ -372,11 +394,37 @@ mod tests {
     }
 
     #[test]
+    fn unsaved_state_tracks_saved_snapshot_and_later_edits() {
+        let mut s = Session::default();
+        assert!(!s.has_unsaved_pages());
+        s.add_batch(vec![page(3000)], 300, false, false);
+        assert!(s.has_unsaved_pages());
+        let snapshot = s.snapshot();
+        s.mark_saved(snapshot.clone());
+        assert!(!s.has_unsaved_pages());
+        let id = s.view().pages[0].id;
+        s.rotate(id).unwrap();
+        assert!(s.has_unsaved_pages());
+        // Completion of an older save must not mark a newer edit as saved.
+        s.mark_saved(snapshot);
+        assert!(s.has_unsaved_pages());
+        s.mark_saved(s.snapshot());
+        assert!(!s.has_unsaved_pages());
+        s.clear();
+        assert!(!s.has_unsaved_pages());
+    }
+
+    #[test]
     fn rejects_mismatched_back_count() {
         let mut s = Session::default();
         s.add_batch(vec![page(3000), page(3000)], 300, true, false);
+        let before: Vec<u64> = s.view().pages.iter().map(|p| p.id).collect();
         assert!(s.add_backs(vec![page(3000)], 300, true, false).is_err());
-        assert_eq!(s.view().awaiting_backs, Some(2), "still waiting after error");
+        let after = s.view();
+        assert_eq!(after.awaiting_backs, Some(2), "still waiting after error");
+        assert_eq!(after.pages.iter().map(|p| p.id).collect::<Vec<_>>(), before, "front pages stay in order");
+        s.add_backs(vec![page(3000), page(3000)], 300, true, false).unwrap();
+        assert_eq!(s.view().pages.len(), 4, "retry adds the backs");
     }
 
     #[test]

@@ -1,0 +1,64 @@
+.duplex-guide-link { display: flex; align-items: center; gap: 2px; margin-top: -8px; color: var(--on-surface-variant); font-size: 12px; }
+.duplex-guide-link .icon-btn { color: var(--tertiary); }
+
+/* A little paper theatre: decorative motion, never a device-specific diagram. */
+dialog.duplex-guide {
+  width: min(940px, calc(100vw - 40px));
+  max-width: none;
+  max-height: calc(100vh - 40px);
+  padding: 0;
+  border: 1px solid var(--outline-variant);
+  border-radius: 28px;
+  background: var(--surface-container-lowest);
+  color: var(--on-surface);
+  box-shadow: var(--elev-3);
+  overflow: auto;
+}
+.duplex-guide::backdrop { background: rgb(11 20 26 / .68); }
+.duplex-guide-top { display: flex; align-items: center; justify-content: space-between; padding: 18px 22px 8px 28px; }
+.duplex-guide-eyebrow { display: flex; align-items: center; gap: 8px; color: var(--tertiary); font-size: 10px; font-weight: 750; letter-spacing: .14em; }
+.duplex-guide-eyebrow .msr { font-size: 19px; }
+.duplex-guide-content { display: grid; grid-template-columns: minmax(230px, .82fr) minmax(300px, 1fr); gap: 32px; padding: 8px 28px 30px; }
+.duplex-guide-visual { position: relative; display: grid; place-items: center; min-height: 420px; overflow: hidden; border-radius: 20px; background: var(--tertiary-container); color: var(--on-tertiary-container); }
+.duplex-orbit { position: absolute; width: 225px; height: 225px; border: 1px solid currentColor; opacity: .15; border-radius: 50%; }
+.duplex-orbit-two { width: 310px; height: 310px; opacity: .08; }
+.duplex-stack { position: relative; width: 144px; height: 190px; transform: rotate(-9deg); animation: duplex-float 5s ease-in-out infinite; }
+.duplex-paper { position: absolute; inset: 0; border-radius: 7px; background: #fff; border: 1px solid rgb(46 16 43 / .18); box-shadow: 0 10px 30px rgb(46 16 43 / .12); }
+.duplex-paper-back { transform: translate(19px, 13px) rotate(10deg); opacity: .5; }
+.duplex-paper-mid { transform: translate(10px, 7px) rotate(5deg); opacity: .75; }
+.duplex-paper-front { display: flex; flex-direction: column; gap: 10px; padding: 31px 24px; }
+.duplex-paper-front i { display: block; width: 90%; height: 5px; border-radius: 9px; background: #c8b8c6; }
+.duplex-paper-front i:nth-child(2) { width: 72%; }
+.duplex-paper-front i:nth-child(3) { width: 82%; }
+.duplex-paper-front b { margin-top: auto; width: 36px; height: 4px; border-radius: 4px; background: #d6237a; }
+.duplex-visual-caption { position: absolute; bottom: 26px; display: flex; align-items: center; gap: 6px; font-size: 10px; font-weight: 750; letter-spacing: .16em; opacity: .72; }
+.duplex-visual-caption .msr { font-size: 18px; }
+.duplex-stack-step-0 { animation: duplex-pickup 2.8s ease-in-out infinite; }
+.duplex-stack-step-1 { animation: duplex-turn 3.5s ease-in-out infinite; }
+.duplex-stack-step-2 { animation: duplex-float 5s ease-in-out infinite; }
+.duplex-guide-copy { padding: 13px 4px 0 0; }
+.duplex-guide-kicker { color: var(--tertiary); font-size: 12px; font-weight: 700; }
+.duplex-guide-copy h2 { margin: 9px 0 10px; font-size: clamp(27px, 3vw, 38px); line-height: 1.08; letter-spacing: -.035em; font-weight: 650; }
+.duplex-guide-intro { margin: 0 0 24px; color: var(--on-surface-variant); line-height: 1.5; }
+.duplex-step-progress { display: flex; gap: 8px; margin: 0 0 22px; }
+.duplex-step-progress button { flex: 1; text-align: left; padding: 8px 0; border: 0; border-top: 3px solid var(--outline-variant); background: transparent; color: var(--on-surface-variant); cursor: pointer; font: inherit; font-size: 11px; font-weight: 700; }
+.duplex-step-progress button.active { border-color: var(--tertiary); color: var(--tertiary); }
+.duplex-current-step { min-height: 120px; }
+.duplex-current-step > span { color: var(--tertiary); font-size: 12px; font-weight: 700; }
+.duplex-current-step h3 { margin: 8px 0; font-size: 20px; line-height: 1.2; }
+.duplex-current-step p { margin: 0; color: var(--on-surface-variant); line-height: 1.5; }
+.duplex-guide-tip { display: flex; gap: 9px; align-items: flex-start; padding: 12px 14px; margin: 22px 0 0; border-radius: 12px; background: var(--surface-container); color: var(--on-surface-variant); font-size: 12px; line-height: 1.45; }
+.duplex-guide-tip .msr { color: var(--tertiary); font-size: 19px; }
+.duplex-guide-warning { color: var(--warning); font-size: 12px; }
+.duplex-guide-actions { display: flex; justify-content: flex-end; flex-wrap: wrap; gap: 8px; margin-top: 20px; }
+@keyframes duplex-pickup { 0%, 100% { transform: translateY(9px) rotate(-9deg); } 50% { transform: translateY(-15px) rotate(-9deg); } }
+@keyframes duplex-turn { 0%, 100% { transform: rotate(-9deg); } 50% { transform: rotate(9deg); } }
+@keyframes duplex-float { 0%, 100% { transform: translateY(0) rotate(-9deg); } 50% { transform: translateY(-10px) rotate(-5deg); } }
+@media (prefers-reduced-motion: reduce) { .duplex-stack { animation: none; } }
+@media (max-width: 720px) {
+  .duplex-guide-content { grid-template-columns: 1fr; gap: 16px; padding: 8px 20px 24px; }
+  .duplex-guide-visual { min-height: 190px; }
+  .duplex-stack { transform: scale(.6) rotate(-9deg); animation: none; }
+  .duplex-visual-caption { bottom: 12px; }
+  .duplex-guide-copy { padding: 0; }
+}

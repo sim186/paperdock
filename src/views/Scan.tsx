@@ -36,6 +36,7 @@ import { ACCEPT } from "../files";
 const printing = () => import("../printing");
 import { useHas, useI18n } from "../i18n";
 import PageViewer from "./PageViewer";
+import DuplexGuide from "./DuplexGuide";
 import { useActivity } from "../activity";
 import { storageGet, storageSet } from "../storage";
 
@@ -59,7 +60,7 @@ const DEFAULTS: Prefs = {
   colorMode: "RGB24",
   resolution: 300,
   paper: "a4",
-  skipBlank: true,
+  skipBlank: false,
   reverseBacks: true,
   format: "pdf",
 };
@@ -101,7 +102,9 @@ export default function ScanView({
   const [busy, setBusy] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<AppError | null>(null);
+  const [scanInterrupted, setScanInterrupted] = useState(false);
   const [confirmNew, setConfirmNew] = useState(false);
+  const [guideOpen, setGuideOpen] = useState(false);
   const [importing, setImporting] = useState(false);
   const [preparingPrint, setPreparingPrint] = useState(false);
   /** Index of the page open in the viewer. */
@@ -138,7 +141,10 @@ export default function ScanView({
       setBusy(false);
       setProgress(null);
       if (e.payload.session) setSession(e.payload.session);
-      if (e.payload.error && e.payload.error.code !== "cancelled") setError(e.payload.error);
+      if (e.payload.error) {
+        setScanInterrupted(true);
+        if (e.payload.error.code !== "cancelled") setError(e.payload.error);
+      }
     });
     return () => {
       unProgress.then((f) => f());
@@ -199,6 +205,11 @@ export default function ScanView({
 
   const adfEmpty = status?.adfState === "ScannerAdfEmpty";
   const awaitingBacks = session.awaitingBacks;
+  const waitingForBacks = awaitingBacks !== null;
+  useEffect(() => {
+    if (waitingForBacks) setGuideOpen(true);
+    else setGuideOpen(false);
+  }, [waitingForBacks]);
   const pages = session.pages;
   const blankCount = pages.filter((p) => p.blank).length;
   const locked = busy || awaitingBacks !== null;
@@ -228,6 +239,7 @@ export default function ScanView({
     ownScan.current = true;
     setBusy(true);
     setError(null);
+    setScanInterrupted(false);
     setProgress(null);
     const request: ScanRequest = { source, colorMode, resolution, paper: prefs.paper, duplex: sides === "auto" };
     try {
@@ -246,6 +258,7 @@ export default function ScanView({
       }
     } catch (e) {
       const err = toAppError(e);
+      setScanInterrupted(true);
       // A user cancel is not an error worth a red banner.
       if (err.code === "cancelled") snack(t("errors.cancelled"));
       else setError(err);
@@ -404,6 +417,19 @@ export default function ScanView({
         </PageHeader>
 
         <ErrorBanner error={info.error ?? error} onRetry={info.error ? info.reload : undefined} />
+        {scanInterrupted && (
+          <div className="banner" role="status">
+            <Icon name="info" />
+            <span>
+              {t("scan.interruptedBatch")}{" "}
+              {pages.length === 0
+                ? t("scan.interruptedNoPages")
+                : awaitingBacks !== null
+                  ? t("scan.interruptedPendingBacks", { n: pages.length })
+                  : t("scan.interruptedPages", { n: pages.length })}
+            </span>
+          </div>
+        )}
 
         {caps && (
           <div className="scan-layout">
@@ -435,6 +461,13 @@ export default function ScanView({
                     { value: "manual", label: t("scan.duplexManual") },
                   ]}
                 />
+              )}
+
+              {source === "Feeder" && sides === "manual" && (
+                <div className="duplex-guide-link">
+                  <IconButton icon="info" label={t("scan.guideOpen")} onClick={() => setGuideOpen(true)} />
+                  <span>{t("scan.guideLink")}</span>
+                </div>
               )}
 
               <SelectField
@@ -471,6 +504,7 @@ export default function ScanView({
                 {source === "Feeder" && (
                   <Switch
                     label={t("scan.skipBlank")}
+                    hint={t("scan.skipBlankHint")}
                     checked={prefs.skipBlank}
                     onChange={(v) => setPrefs({ skipBlank: v })}
                     disabled={busy}
@@ -502,6 +536,9 @@ export default function ScanView({
                     <div className="row wrap">
                       <Button icon="document_scanner" onClick={() => run("backs")} disabled={!canScan}>
                         {t("scan.scanBacks")}
+                      </Button>
+                      <Button variant="text" icon="help" onClick={() => setGuideOpen(true)} disabled={busy}>
+                        {t("scan.guideOpen")}
                       </Button>
                       <Button variant="text" onClick={() => edit(() => api.finishFronts(prefs.skipBlank))} disabled={busy}>
                         {t("scan.skipBacks")}
@@ -674,6 +711,15 @@ export default function ScanView({
         )}
       </section>
 
+      <DuplexGuide
+        open={guideOpen && active && !busy}
+        count={awaitingBacks}
+        ready={canScan}
+        empty={adfEmpty}
+        onClose={() => setGuideOpen(false)}
+        onScan={() => { setGuideOpen(false); void run("backs"); }}
+      />
+
       {viewing !== null && (
         <PageViewer
           pages={pages}
@@ -695,6 +741,7 @@ export default function ScanView({
         onClose={() => setConfirmNew(false)}
         onConfirm={() => {
           setConfirmNew(false);
+          setScanInterrupted(false);
           edit(api.clearSession);
         }}
       />

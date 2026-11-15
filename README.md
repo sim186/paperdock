@@ -67,6 +67,7 @@ npm run tauri dev
 Tests:
 
 ```sh
+npm test                                     # frontend tests, simulated backend
 cd src-tauri
 cargo test                                   # unit tests, offline
 PAPERDOCK_HOST=192.168.1.84 cargo test live -- --ignored --nocapture   # read-only, real device
@@ -79,7 +80,7 @@ Build installers for the current OS: `npm run tauri build`.
 GitHub Actions (`.github/workflows/`):
 
 - `ci.yml`: on every push to `main` and every pull request, typechecks and builds
-  the frontend and runs `cargo test`.
+  and tests the frontend and runs `cargo test`.
 - `release.yml`: builds the installers on macOS, Windows and Linux and attaches
   them to a **draft** release. To release:
 
