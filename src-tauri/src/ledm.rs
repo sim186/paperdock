@@ -214,7 +214,13 @@ impl EmailAccount {
     fn to_xml(&self) -> String {
         let mut auth = String::new();
         if let Some(user) = self.username.as_deref().filter(|u| !u.is_empty()) {
-            auth.push_str("<security:AuthenticationSettings><security:SimpleAuthenticationSettings>");
+            // The M276n answers 400 without CredentialType, although its
+            // capability file does not list the element.
+            auth.push_str(concat!(
+                "<security:AuthenticationSettings>",
+                "<security:CredentialType>hp_simple_v1</security:CredentialType>",
+                "<security:SimpleAuthenticationSettings>",
+            ));
             auth.push_str(&format!("<dd:UserName>{}</dd:UserName>", escape(user)));
             if let Some(pw) = &self.password {
                 auth.push_str(&format!("<dd:Password>{}</dd:Password>", escape(pw)));
@@ -239,8 +245,10 @@ impl EmailAccount {
                 "<dd:MaxAttachmentSize>{max}</dd:MaxAttachmentSize>",
                 "{auth}",
                 "<dd:UseSSL>{ssl}</dd:UseSSL>",
-                "<emaildyn:EmailCopy>{copy}</emaildyn:EmailCopy>",
                 "</dsd2:SMTPServerSettings>",
+                // EmailAccountsCap.xml places EmailCopy inside SMTPServerSettings,
+                // but the device stores it here and answers 400 to the other spot.
+                "<emaildyn:EmailCopy>{copy}</emaildyn:EmailCopy>",
                 "{pin}",
                 "</emaildyn:EmailAccount>",
             ),
@@ -271,6 +279,14 @@ fn entry_id(node: roxmltree::Node) -> Option<String> {
         })
         .and_then(|n| n.text())
         .map(|t| t.trim().to_string())
+        // The M276n only reports `<dd:ResourceURI>/DevMgmt/Email/Accounts/2</dd:ResourceURI>`.
+        .or_else(|| {
+            children(node, "ResourceURI")
+                .next()
+                .and_then(|n| n.text())
+                .and_then(|uri| uri.trim().rsplit('/').next().map(str::to_string))
+                .filter(|id| !id.is_empty())
+        })
 }
 
 fn parse_accounts(xml: &str) -> Result<Vec<EmailAccount>> {
@@ -289,7 +305,7 @@ fn parse_accounts(xml: &str) -> Result<Vec<EmailAccount>> {
                     .and_then(|v| v.parse().ok())
                     .unwrap_or(0),
                 use_ssl: s("UseSSL").as_deref() == Some("true"),
-                cc_to_self: s("EmailCopy").as_deref() == Some("CcToSelf"),
+                cc_to_self: text(a, "EmailCopy").as_deref() == Some("CcToSelf"),
                 username: s("UserName").filter(|u| !u.is_empty()),
                 password: None,
                 pin: None,
@@ -545,6 +561,44 @@ mod tests {
         assert!(a.use_ssl);
         assert_eq!(a.username.as_deref(), Some("scan"));
         assert!(a.password.is_none(), "password must never be read back");
+    }
+
+    #[test]
+    fn account_xml_matches_what_the_m276n_accepts() {
+        let mut a = sample();
+        a.cc_to_self = true;
+        let xml = a.to_xml();
+        assert!(xml.contains(
+            "<security:AuthenticationSettings><security:CredentialType>hp_simple_v1</security:CredentialType>"
+        ));
+        assert!(
+            xml.contains("</dsd2:SMTPServerSettings><emaildyn:EmailCopy>CcToSelf</emaildyn:EmailCopy>"),
+            "EmailCopy must sit outside SMTPServerSettings"
+        );
+    }
+
+    #[test]
+    fn parses_accounts_as_the_m276n_reports_them() {
+        let xml = format!(
+            concat!(
+                "<emaildyn:EmailAccounts {ns}><emaildyn:EmailAccount>",
+                "<dd:ResourceURI>/DevMgmt/Email/Accounts/2</dd:ResourceURI>",
+                "<dd:DisplayName>Probe</dd:DisplayName><dd:EmailAddress>p@gmail.com</dd:EmailAddress>",
+                "<dsd2:SMTPServerSettings><dd3:NetworkID>smtp.gmail.com</dd3:NetworkID><dd:Port>465</dd:Port>",
+                "<dd:MaxAttachmentSize>0</dd:MaxAttachmentSize><security:AuthenticationSettings>",
+                "<security:CredentialType>hp_simple_v1</security:CredentialType>",
+                "<security:SimpleAuthenticationSettings><dd:UserName>p@gmail.com</dd:UserName>",
+                "</security:SimpleAuthenticationSettings></security:AuthenticationSettings>",
+                "<dd:UseSSL>true</dd:UseSSL></dsd2:SMTPServerSettings>",
+                "<emaildyn:EmailCopy>CcToSelf</emaildyn:EmailCopy>",
+                "</emaildyn:EmailAccount></emaildyn:EmailAccounts>",
+            ),
+            ns = NS
+        );
+        let a = &parse_accounts(&xml).unwrap()[0];
+        assert_eq!(a.id.as_deref(), Some("2"));
+        assert!(a.cc_to_self);
+        assert_eq!(a.username.as_deref(), Some("p@gmail.com"));
     }
 
     #[test]
