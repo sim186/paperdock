@@ -84,13 +84,21 @@ GitHub Actions (`.github/workflows/`):
   them to a **draft** release. To release:
 
   ```sh
-  # bump "version" in src-tauri/tauri.conf.json, package.json and src-tauri/Cargo.toml
-  git commit -am "Release 0.2.0"
-  git tag v0.2.0 && git push && git push --tags
+  npm version minor        # or patch / major: 0.1.0 → 0.2.0
+  git push --follow-tags
   ```
 
-  then review the draft on the Releases page and publish it. The tag must match the
-  version in `tauri.conf.json`. The workflow can also be run by hand from the Actions tab.
+  then review the draft on the Releases page and publish it. The workflow can also
+  be run by hand from the Actions tab.
+
+### Versioning
+
+[Semantic versioning](https://semver.org): `major` for changes that break saved
+settings or drop a supported OS, `minor` for features, `patch` for fixes.
+`package.json` is the only place the version is written: `tauri.conf.json` reads it,
+and `npm version` copies it into `src-tauri/Cargo.toml` / `Cargo.lock`
+(`scripts/sync-version.mjs`), commits as `X.Y.Z` and tags `vX.Y.Z`. Pushing the tag
+starts the release build, which fails if the tag and `package.json` disagree.
 
 ## Layout
 
