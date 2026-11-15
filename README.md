@@ -3,11 +3,11 @@
 Cross-platform (macOS, Linux, Windows) app to manage network printers and scanners
 of any brand. Built with Tauri 2 (Rust) + React. UI in Italian and English.
 
-![PaperDock printing a PDF, with a progress snackbar](docs/screenshots/app-print.png)
+![Batch scanning from the document feeder](docs/screenshots/app-scan.png)
 
 <p align="center">
-  <img src="docs/screenshots/app-overview-dark.png" alt="Overview in dark mode: supplies, alerts and a warning snackbar" width="49%">
-  <img src="docs/screenshots/snackbar-states-light.png" alt="Snackbar states" width="40%">
+  <img src="docs/screenshots/app-print.png" alt="Printing a PDF" width="49%">
+  <img src="docs/screenshots/app-overview-dark.png" alt="Overview in dark mode: state, alerts and supply levels" width="49%">
 </p>
 
 It speaks open standards first and vendor APIs only as extras:
@@ -40,57 +40,10 @@ Tabs appear only for what the device supports.
   with pdf-lib and sent as one PDF with IPP Print-Job, so the printer only needs
   to accept `application/pdf`.
 - **HP**: email profiles (SMTP accounts) and scan-to-email defaults
+- **Status messages**: results (printed, saved, failed…) and progress of long jobs
+  in a Material 3 snackbar; light and dark theme
 
 Tested on HP LaserJet 200 colorMFP M276n and HP DeskJet 3700.
-
-## Status snackbar
-
-Results of what you do (printed, saved, copied, failed…) appear in a
-[Material 3 snackbar](https://m3.material.io/components/snackbar/overview) at the
-bottom of the window. It lives in [`src/snackbar.tsx`](src/snackbar.tsx) and has no
-dependencies beyond React.
-
-| Light | Dark |
-|---|---|
-| ![Snackbar states, light theme](docs/screenshots/snackbar-states-light.png) | ![Snackbar states, dark theme](docs/screenshots/snackbar-states-dark.png) |
-
-```tsx
-const snack = useSnackbar();
-
-snack("Copied serial number");                       // info, 4 s
-snack("Printed · report.pdf", { kind: "success" });
-snack("Toner low", { kind: "warning" });             // 8 s
-snack(errorText(e), { kind: "error" });              // 8 s, role="alert"
-snack("Saved scan.pdf", { kind: "success", action: { label: "Show", run: reveal } });
-
-// Long-running work: one snackbar that changes state in place.
-const job = snack("Sending…", { kind: "progress" }); // stays until updated
-job.update("Printing…", { progress: 0.5 });          // determinate bar
-job.update("Printed", { kind: "success" });          // now times out as usual
-job.dismiss();
-```
-
-| Option | Meaning |
-|---|---|
-| `kind` | `info` (default, no icon), `success`, `warning`, `error`, `progress` |
-| `action` | `{ label, run }`: a text button; long messages move it to its own row |
-| `duration` | ms on screen, `null` to stay until dismissed. Default 4 s, 8 s for errors, warnings and snacks with an action, none for progress |
-| `progress` | 0–1 for a determinate bar; omit for indeterminate |
-| `key` | a new snack with the same key replaces the old one in place (e.g. `"print"`) |
-
-Behaviour:
-
-- One at a time, queued in order, as M3 asks.
-- The timer pauses while the pointer or keyboard focus is on the snackbar and while the
-  window is hidden; Escape or the ✕ button dismisses it.
-- It rises above sticky bottom bars (`.doc-bar`, `.form-bar`) so it never covers
-  the Save or Print buttons.
-- Inverse-surface colors with status accents tuned for contrast in both themes;
-  honours `prefers-reduced-motion`.
-- `role="status"` (polite) for most kinds, `role="alert"` for errors.
-
-In `npm run dev` (plain browser, mocked backend) add `?snack=info|success|warning|error|progress|action|long`
-to the URL to see a sample, and `&bare` to hide the app behind it.
 
 ## Develop
 
