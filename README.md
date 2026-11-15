@@ -88,8 +88,9 @@ GitHub Actions (`.github/workflows/`):
   git push --follow-tags
   ```
 
-  then review the draft on the Releases page and publish it. The workflow can also
-  be run by hand from the Actions tab.
+  then review the draft on the Releases page and publish it. Run by hand from the
+  Actions tab, the workflow only builds and attaches the installers to the run as
+  artifacts (handy to test a branch).
 
 ### Versioning
 
