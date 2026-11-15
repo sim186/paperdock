@@ -2,6 +2,7 @@
 
 I was really tired of being forced to use the garbage software provided by printer vendors. HP is the only brand I currently have, but I imagine the situation is similar with other manufacturers. So I decided to build an interface to make their printers easier to configure and use.
 So far, I’ve only tested it with my two HP printers, and it’s not complete yet. If you’d like to try it with your own printers and contribute, I’d be happy to integrate your changes.
+
 The goal is to replace the vendor's default software altogether: PaperDock needs no drivers, talks to the printer directly over open standards, works around the quirks of old firmware that vendors no longer fix, and runs on all major operating systems (macOS, Windows and Linux). For now it focuses on the features I need most, such as scanning documents in batches from the feeder and adding existing PDFs or images to a scan.
 
 The text below is completely LLM generated, consider it as documentation.
