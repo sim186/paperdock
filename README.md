@@ -1,5 +1,10 @@
 # PaperDock
 
+I was really tired of being forced to use the garbage software provided by printer vendors. HP is the only brand I currently have, but I imagine the situation is similar with other manufacturers. So I decided to build an interface to make their printers easier to configure and use.
+So far, I’ve only tested it with my two HP printers, and it’s not complete yet. If you’d like to try it with your own printers and contribute, I’d be happy to integrate your changes.
+
+The text below is completely LLM generated, consider it as documentation.
+
 Cross-platform (macOS, Linux, Windows) app to manage network printers and scanners
 of any brand. Built with Tauri 2 (Rust) + React. UI in Italian and English.
 
